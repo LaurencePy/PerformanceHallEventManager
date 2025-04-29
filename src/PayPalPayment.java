@@ -1,6 +1,4 @@
-package payment;
 
-import model.Address;
 
 public class PayPalPayment implements PaymentMethod {
 
@@ -11,7 +9,7 @@ public class PayPalPayment implements PaymentMethod {
     }
 
     @Override
-    public void processPayment(double amount, Address fullAddress) {
-
+    public Receipt processPayment(double amount, Address fullAddress) {
+    	return null;
     }
 }

@@ -1,7 +1,7 @@
-package model;
 
-import enums.AgeRestrictionCategory;
-import enums.LiveEventCategory;
+
+
+
 
 public abstract class LiveEvent {
     private int eventID;

@@ -1,8 +1,8 @@
-package user;
+
 
 import java.util.ArrayList;
 import java.util.List;
-import model.LiveEvent;
+
 
 public class Basket {
     private List<LiveEvent> tickets;
