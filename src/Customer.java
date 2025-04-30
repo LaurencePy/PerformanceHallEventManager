@@ -1,8 +1,12 @@
 
 
 public class Customer extends User {
+    public Customer(String userID, String name, Address address) {
+        super(userID, name, address);
+    }
 
-    public Customer(String username) {
-        super(username);
+    @Override
+    public void openPage() {
+        new CustomerPage(name).setVisible(true);
     }
 }

@@ -1,0 +1,88 @@
+import java.awt.EventQueue;
+
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.SwingConstants;
+import javax.swing.border.EmptyBorder;
+import javax.swing.JList;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import java.awt.Font;
+import javax.swing.JButton;
+import java.awt.Color;
+import javax.swing.DefaultComboBoxModel;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+
+public class LoginFrame extends JFrame {
+
+	private static final long serialVersionUID = 1L;
+	private JPanel contentPane;
+
+	/**
+	 * Launch the application.
+	 */
+	public static void main(String[] args) {
+		EventQueue.invokeLater(new Runnable() {
+			public void run() {
+				try {
+					LoginFrame frame = new LoginFrame();
+					frame.setVisible(true);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+	}
+
+	/**
+	 * Create the frame.
+	 */
+	public LoginFrame() {
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setBounds(100, 100, 450, 300);
+		contentPane = new JPanel();
+		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+
+		setContentPane(contentPane);
+		contentPane.setLayout(null);
+		
+		JPanel panel = new JPanel();
+		panel.setBounds(10, 10, 416, 243);
+		contentPane.add(panel);
+		panel.setLayout(null);
+		
+		JComboBox comboBox = new JComboBox();
+		comboBox.setFont(new Font("Tahoma", Font.PLAIN, 15));
+		comboBox.setModel(new DefaultComboBoxModel(new String[] {"Sarasvati", "Felix", "Hikaru", "Salma"}));
+		comboBox.setBounds(113, 121, 155, 26);
+		panel.add(comboBox);
+		
+		JLabel userText = new JLabel("Select your user:");
+		userText.setFont(new Font("Tahoma", Font.PLAIN, 15));
+		userText.setBounds(130, 77, 155, 34);
+		panel.add(userText);
+		
+		JLabel titleText = new JLabel("Login");
+		titleText.setFont(new Font("Tahoma", Font.PLAIN, 20));
+		titleText.setBounds(10, 10, 174, 26);
+		panel.add(titleText);
+		
+		JButton btnLogin = new JButton("Login");
+		btnLogin.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				String selectedName = (String) comboBox.getSelectedItem();
+				ManageUsers manageUsers = new ManageUsers("UserAccounts.txt");
+				User user = manageUsers.getUserFromName(selectedName);
+				if (user != null) {
+				    user.openPage();
+				    dispose();
+				}
+			}
+		});
+		btnLogin.setBackground(new Color(192, 192, 192));
+		btnLogin.setFont(new Font("Tahoma", Font.PLAIN, 15));
+		btnLogin.setBounds(21, 167, 186, 26);
+		panel.add(btnLogin);
+	}
+}
