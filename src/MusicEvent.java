@@ -1,9 +1,16 @@
-
-
 public class MusicEvent extends LiveEvent {
 
-    public MusicEvent(int eventID, String eventName, AgeRestrictionCategory restriction, int quantityInStock, double performanceFee, double ticketPrice) {
-        super(eventID, eventName, restriction, quantityInStock, performanceFee, ticketPrice, LiveEventCategory.MUSIC);
+    private String additionalInfo;
+
+    public MusicEvent(int eventID, String eventName, AgeRestrictionCategory restriction,
+                      int quantityInStock, double performanceFee, double ticketPrice,
+                      LiveEventCategory category, String additionalInfo) {
+        super(eventID, eventName, restriction, quantityInStock, performanceFee, ticketPrice, category);
+        this.additionalInfo = additionalInfo;
+    }
+
+    public String getAdditionalInfo() {
+        return additionalInfo;
     }
 
     @Override
