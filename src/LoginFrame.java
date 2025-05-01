@@ -5,6 +5,7 @@ import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import java.awt.Font;
@@ -54,7 +55,7 @@ public class LoginFrame extends JFrame {
 		
 		JComboBox comboBox = new JComboBox();
 		comboBox.setFont(new Font("Tahoma", Font.PLAIN, 15));
-		comboBox.setModel(new DefaultComboBoxModel(new String[] {"Sarasvati", "Felix", "Hikaru", "Salma"}));
+		comboBox.setModel(new DefaultComboBoxModel(new String[] {"Select", "Sarasvati", "Felix", "Hikaru", "Salma"}));
 		comboBox.setBounds(113, 121, 155, 26);
 		panel.add(comboBox);
 		
@@ -65,7 +66,7 @@ public class LoginFrame extends JFrame {
 		
 		JLabel titleText = new JLabel("Login");
 		titleText.setFont(new Font("Tahoma", Font.PLAIN, 20));
-		titleText.setBounds(10, 10, 174, 26);
+		titleText.setBounds(163, 10, 59, 26);
 		panel.add(titleText);
 		
 		JButton btnLogin = new JButton("Login");
@@ -74,15 +75,17 @@ public class LoginFrame extends JFrame {
 				String selectedName = (String) comboBox.getSelectedItem();
 				ManageUsers manageUsers = new ManageUsers("UserAccounts.txt");
 				User user = manageUsers.getUserFromName(selectedName);
-				if (user != null) {
+				if (user != null && !selectedName.equals("Select")) {
 				    user.openPage();
 				    dispose();
+				} else {
+				    JOptionPane.showMessageDialog(null, "Invalid user selected.");
 				}
 			}
 		});
 		btnLogin.setBackground(new Color(192, 192, 192));
 		btnLogin.setFont(new Font("Tahoma", Font.PLAIN, 15));
-		btnLogin.setBounds(21, 167, 186, 26);
+		btnLogin.setBounds(99, 169, 186, 26);
 		panel.add(btnLogin);
 	}
 }
