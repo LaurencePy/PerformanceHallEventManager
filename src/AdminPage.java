@@ -37,6 +37,16 @@ public class AdminPage extends JFrame {
         btnLogout.setBounds(10, 10, 92, 27);
         contentPane.add(btnLogout);
 
+
+        JTabbedPane tabbedPane = new JTabbedPane();
+        tabbedPane.setBounds(10, 50, 910, 300);
+        contentPane.add(tabbedPane);
+
+
+        JPanel viewEventsPanel = new JPanel();
+        viewEventsPanel.setLayout(null);
+        tabbedPane.addTab("View Events", viewEventsPanel);
+
         String[] headers = {
             "Event ID", "Event Category", "Event Type", "Event Name",
             "Age Restrictions", "Quantity", "Performance Fee", "Ticket Price", "Additional Info"
@@ -55,7 +65,7 @@ public class AdminPage extends JFrame {
                 info = p.getAdditionalInfo();
             }
 
-            tableModel.addRow(new Object[] {
+            tableModel.addRow(new Object[]{
                 e.getEventID(),
                 e.getEventCategory(),
                 eventType,
@@ -69,12 +79,10 @@ public class AdminPage extends JFrame {
         }
 
         tblEvents = new JTable(tableModel);
+        tblEvents.setEnabled(false);
         tblEvents.setAutoCreateRowSorter(true);
         tblEvents.setFillsViewportHeight(true);
-
-
         setColumnWidths(tblEvents);
-
 
         TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(tableModel);
         tblEvents.setRowSorter(sorter);
@@ -83,17 +91,91 @@ public class AdminPage extends JFrame {
         ));
 
         JScrollPane scrollPane = new JScrollPane(tblEvents);
-        scrollPane.setBounds(10, 50, 910, 280);
-        contentPane.add(scrollPane);
+        scrollPane.setBounds(0, 0, 890, 260);
+        viewEventsPanel.add(scrollPane);
+
+
+        JPanel addEventPanel = new JPanel();
+        addEventPanel.setLayout(null);
+
+        String[] ageOptions = { "All", "Adults" };
+        String[] categoryOptions = { "Music", "Performance" };
+
+        JLabel lblEventID = new JLabel("Event ID:");
+        lblEventID.setBounds(20, 20, 100, 25);
+        addEventPanel.add(lblEventID);
+        JTextField txtEventID = new JTextField();
+        txtEventID.setBounds(130, 20, 200, 25);
+        addEventPanel.add(txtEventID);
+
+        JLabel lblCategory = new JLabel("Category:");
+        lblCategory.setBounds(20, 60, 100, 25);
+        addEventPanel.add(lblCategory);
+        JComboBox<String> cmbCategory = new JComboBox<>(categoryOptions);
+        cmbCategory.setBounds(130, 60, 200, 25);
+        addEventPanel.add(cmbCategory);
+
+        JLabel lblType = new JLabel("Event Type:");
+        lblType.setBounds(20, 100, 100, 25);
+        addEventPanel.add(lblType);
+        JTextField txtType = new JTextField();
+        txtType.setBounds(130, 100, 200, 25);
+        addEventPanel.add(txtType);
+
+        JLabel lblName = new JLabel("Event Name:");
+        lblName.setBounds(20, 140, 100, 25);
+        addEventPanel.add(lblName);
+        JTextField txtName = new JTextField();
+        txtName.setBounds(130, 140, 200, 25);
+        addEventPanel.add(txtName);
+
+        JLabel lblAge = new JLabel("Age Restriction:");
+        lblAge.setBounds(20, 180, 100, 25);
+        addEventPanel.add(lblAge);
+        JComboBox<String> cmbAge = new JComboBox<>(ageOptions);
+        cmbAge.setBounds(130, 180, 200, 25);
+        addEventPanel.add(cmbAge);
+
+        JLabel lblQty = new JLabel("Quantity:");
+        lblQty.setBounds(370, 20, 100, 25);
+        addEventPanel.add(lblQty);
+        JTextField txtQty = new JTextField();
+        txtQty.setBounds(480, 20, 200, 25);
+        addEventPanel.add(txtQty);
+
+        JLabel lblFee = new JLabel("Performance Fee:");
+        lblFee.setBounds(370, 60, 100, 25);
+        addEventPanel.add(lblFee);
+        JTextField txtFee = new JTextField();
+        txtFee.setBounds(480, 60, 200, 25);
+        addEventPanel.add(txtFee);
+
+        JLabel lblPrice = new JLabel("Ticket Price:");
+        lblPrice.setBounds(370, 100, 100, 25);
+        addEventPanel.add(lblPrice);
+        JTextField txtPrice = new JTextField();
+        txtPrice.setBounds(480, 100, 200, 25);
+        addEventPanel.add(txtPrice);
+
+        JLabel lblInfo = new JLabel("Additional Info:");
+        lblInfo.setBounds(370, 140, 100, 25);
+        addEventPanel.add(lblInfo);
+        JTextField txtInfo = new JTextField();
+        txtInfo.setBounds(480, 140, 200, 25);
+        addEventPanel.add(txtInfo);
+
+        // Submit Button
+        JButton btnSubmit = new JButton("Add Event");
+        btnSubmit.setBounds(370, 200, 150, 30);
+        addEventPanel.add(btnSubmit);
+
+        tabbedPane.addTab("Add Event", addEventPanel);
     }
 
     private void setColumnWidths(JTable table) {
-
         TableColumn column;
         for (int i = 0; i < table.getColumnCount(); i++) {
             column = table.getColumnModel().getColumn(i);
-
-
             switch (i) {
                 case 0:
                     column.setPreferredWidth(100);
