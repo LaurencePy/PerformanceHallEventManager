@@ -26,11 +26,6 @@ public class CustomerPage extends JFrame {
 
 		setContentPane(contentPane);
         contentPane.setLayout(null);
-        JLabel label = new JLabel("Welcome, " + name);
-        label.setBounds(143, 10, 149, 19);
-        label.setFont(new Font("Tahoma", Font.PLAIN, 15));
-        label.setHorizontalAlignment(SwingConstants.CENTER);
-        getContentPane().add(label);
         
         JButton btnLogout = new JButton("Logout");
         btnLogout.addActionListener(e -> {

@@ -29,9 +29,9 @@ public class ManageEvents {
 
                     LiveEvent event = null;
                     if (category == LiveEventCategory.MUSIC) {
-                        event = new MusicEvent(eventID, name, restriction, quantity, fee, price, category, info);
+                        event = new MusicEvent(eventID, name, restriction, quantity, fee, price, category, eventType, info);
                     } else if (category == LiveEventCategory.PERFORMANCE) {
-                        event = new Performance(eventID, name, restriction, quantity, fee, price, category, info);
+                        event = new Performance(eventID, name, restriction, quantity, fee, price, category, eventType, info);
                     }
 
 

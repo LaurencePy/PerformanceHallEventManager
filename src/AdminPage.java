@@ -5,6 +5,7 @@ import javax.swing.table.TableColumn;
 import javax.swing.RowFilter;
 import javax.swing.table.TableRowSorter;
 import java.awt.*;
+import java.io.IOException;
 import java.util.List;
 
 public class AdminPage extends JFrame {
@@ -21,12 +22,6 @@ public class AdminPage extends JFrame {
         contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
         contentPane.setLayout(null);
         setContentPane(contentPane);
-
-        JLabel label = new JLabel("Welcome, " + name);
-        label.setBounds(410, 10, 200, 25);
-        label.setFont(new Font("Tahoma", Font.PLAIN, 15));
-        label.setHorizontalAlignment(SwingConstants.CENTER);
-        contentPane.add(label);
 
         JButton btnLogout = new JButton("Logout");
         btnLogout.addActionListener(e -> {
@@ -52,11 +47,23 @@ public class AdminPage extends JFrame {
             "Age Restrictions", "Quantity", "Performance Fee", "Ticket Price", "Additional Info"
         };
 
-        DefaultTableModel tableModel = new DefaultTableModel(headers, 0);
+        DefaultTableModel tableModel = new DefaultTableModel(headers, 0) {
+            @Override
+            public Class<?> getColumnClass(int columnIndex) {
+                return switch (columnIndex) {
+                    case 0 -> Integer.class;
+                    case 5 -> Integer.class;
+                    case 6 -> Double.class;
+                    case 7 -> Double.class;
+                    default -> String.class;
+                };
+            }
+        };
+
         List<LiveEvent> events = new ManageEvents("Stock.txt").getAllEvents();
 
         for (LiveEvent e : events) {
-            String eventType = e instanceof MusicEvent ? "MusicEvent" : "Performance";
+        	String eventType = e.getEventType();
             String info = "";
 
             if (e instanceof MusicEvent m) {
@@ -68,7 +75,7 @@ public class AdminPage extends JFrame {
             tableModel.addRow(new Object[]{
                 e.getEventID(),
                 e.getEventCategory(),
-                eventType,
+                e.getEventType(),
                 e.getEventName(),
                 e.getAgeRestriction(),
                 e.getQuantityInStock(),
@@ -164,11 +171,98 @@ public class AdminPage extends JFrame {
         txtInfo.setBounds(480, 140, 200, 25);
         addEventPanel.add(txtInfo);
 
-        // Submit Button
+
         JButton btnSubmit = new JButton("Add Event");
         btnSubmit.setBounds(370, 200, 150, 30);
         addEventPanel.add(btnSubmit);
+        btnSubmit.addActionListener(e -> {
+            try {
+            	
+                if (txtEventID.getText().trim().isEmpty() ||
+                        txtType.getText().trim().isEmpty() ||
+                        txtName.getText().trim().isEmpty() ||
+                        txtQty.getText().trim().isEmpty() ||
+                        txtFee.getText().trim().isEmpty() ||
+                        txtPrice.getText().trim().isEmpty()) {
+                        JOptionPane.showMessageDialog(null, "All fields except Additional Info are mandatory");
+                        return;
+                    }
+                
+                String idText = txtEventID.getText().trim();
+                if (!idText.matches("\\d{5}")) {
+                    JOptionPane.showMessageDialog(null, "Event ID must be 5 digits.");
+                    return;
+                }
 
+                List<LiveEvent> existingEvents = new ManageEvents("Stock.txt").getAllEvents();
+                for (LiveEvent existing : existingEvents) {
+                    if (String.valueOf(existing.getEventID()).equals(idText)) {
+                        JOptionPane.showMessageDialog(null, "Duplicate Event ID");
+                        return;
+                    }
+                }
+
+                int eventID = Integer.parseInt(idText);
+                String category = (String) cmbCategory.getSelectedItem();
+                String type = txtType.getText().trim();
+                String eventName = txtName.getText().trim();
+                String age = (String) cmbAge.getSelectedItem();
+
+                int qty;
+                double fee, price;
+                try {
+                    qty = Integer.parseInt(txtQty.getText().trim());
+                    fee = Double.parseDouble(txtFee.getText().trim());
+                    price = Double.parseDouble(txtPrice.getText().trim());
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(null, "Quantity must type integer. Fee and Price must be integer/double");
+                    return;
+                }
+
+                String info = txtInfo.getText().trim();
+
+                String line = String.format("%d, %s, %s, %s, %s, %d, %.2f, %.2f, %s",
+                        eventID, category, type, eventName, age, qty, fee, price, info);
+
+                java.nio.file.Files.write(
+                        java.nio.file.Paths.get("Stock.txt"),
+                        (line + System.lineSeparator()).getBytes(),
+                        java.nio.file.StandardOpenOption.APPEND
+                );
+
+                DefaultTableModel model = (DefaultTableModel) tblEvents.getModel();
+                model.addRow(new Object[] {
+                        eventID,
+                        category,
+                        type,
+                        eventName,
+                        age,
+                        qty,
+                        fee,
+                        price,
+                        info
+                });
+                ((DefaultTableModel) tblEvents.getModel()).fireTableDataChanged();
+
+                txtEventID.setText("");
+                txtType.setText("");
+                txtName.setText("");
+                txtQty.setText("");
+                txtFee.setText("");
+                txtPrice.setText("");
+                txtInfo.setText("");
+                cmbAge.setSelectedIndex(0);
+                cmbCategory.setSelectedIndex(0);
+
+                JOptionPane.showMessageDialog(null, "Event added");
+
+            } catch (IOException ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(null, "Stock file error");
+            }
+        });
+
+        
         tabbedPane.addTab("Add Event", addEventPanel);
     }
 
