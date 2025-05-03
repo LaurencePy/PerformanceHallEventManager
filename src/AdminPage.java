@@ -275,7 +275,7 @@ public class AdminPage extends JFrame {
                     column.setPreferredWidth(100);
                     break;
                 case 1:
-                    column.setPreferredWidth(120);
+                    column.setPreferredWidth(140);
                     break;
                 case 2:
                     column.setPreferredWidth(150);
@@ -284,16 +284,16 @@ public class AdminPage extends JFrame {
                     column.setPreferredWidth(250);
                     break;
                 case 4:
-                    column.setPreferredWidth(120);
+                    column.setPreferredWidth(140);
                     break;
                 case 5:
                     column.setPreferredWidth(100);
                     break;
                 case 6:
-                    column.setPreferredWidth(120);
+                    column.setPreferredWidth(150);
                     break;
                 case 7:
-                    column.setPreferredWidth(120);
+                    column.setPreferredWidth(140);
                     break;
                 case 8:
                     column.setPreferredWidth(200);
