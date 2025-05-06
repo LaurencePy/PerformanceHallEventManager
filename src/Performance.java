@@ -14,7 +14,7 @@ public class Performance extends LiveEvent {
     public String getAdditionalInfo() {
         return additionalInfo;
     }
-
+    
     @Override
     public String toString() {
         return "Performance: " + getEventName();

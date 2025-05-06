@@ -1,50 +1,80 @@
-import java.awt.Font;
+import java.awt.*;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
-
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableRowSorter;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.PlainDocument;
 
 public class CustomerPage extends JFrame {
-
     private static final long serialVersionUID = 1L;
-    private JPanel contentPane;
     private JTable tblEvents;
+    private JTable tblBasket;
+    private JTextField txtEventIDFilter;
+    private JTextField txtLanguageFilter;
+    private JButton btnFilter;
+    private JButton btnLogout;
 
     public CustomerPage(String name) {
         setTitle(name + " - Customer");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setBounds(100, 100, 1000, 450);
-        contentPane = new JPanel();
-        contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
-        contentPane.setLayout(null);
+        setBounds(100, 100, 1000, 600);
+
+        JPanel contentPane = new JPanel(new BorderLayout(10, 10));
+        contentPane.setBorder(new EmptyBorder(10, 10, 10, 10));
         setContentPane(contentPane);
 
-        JButton btnLogout = new JButton("Logout");
-        btnLogout.addActionListener(e -> {
-            new LoginFrame().setVisible(true);
-            dispose();
-        });
+        JPanel topPanel = new JPanel(new BorderLayout());
+        JPanel filterPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+
+        btnLogout = new JButton("Logout");
         btnLogout.setFont(new Font("Tahoma", Font.PLAIN, 15));
-        btnLogout.setBounds(10, 10, 92, 27);
-        contentPane.add(btnLogout);
+        topPanel.add(btnLogout, BorderLayout.WEST);
+
+        txtEventIDFilter = new JTextField(5);
+        txtEventIDFilter.setDocument(new PlainDocument() {
+            @Override
+            public void insertString(int offs, String str, AttributeSet a) throws BadLocationException {
+                if ((getLength() + str.length()) <= 5 && str.matches("\\d+")) {
+                    super.insertString(offs, str, a);
+                }
+            }
+        });
+
+        txtLanguageFilter = new JTextField(10);
+        btnFilter = new JButton("Filter");
+
+        filterPanel.add(new JLabel("Filter by Event ID:"));
+        filterPanel.add(txtEventIDFilter);
+        filterPanel.add(new JLabel("Filter by Language:"));
+        filterPanel.add(txtLanguageFilter);
+        filterPanel.add(btnFilter);
+
+        topPanel.add(filterPanel, BorderLayout.CENTER);
+        contentPane.add(topPanel, BorderLayout.NORTH);
 
         JTabbedPane tabbedPane = new JTabbedPane();
-        tabbedPane.setBounds(10, 50, 960, 340);
-        contentPane.add(tabbedPane);
+        contentPane.add(tabbedPane, BorderLayout.CENTER);
+
+        tabbedPane.addChangeListener(e -> {
+            int selectedIndex = tabbedPane.getSelectedIndex();
+            String selectedTitle = tabbedPane.getTitleAt(selectedIndex);
+            filterPanel.setVisible("View Events".equals(selectedTitle));
+        });
 
         JPanel viewEventsPanel = new JPanel();
-        viewEventsPanel.setLayout(null);
+        viewEventsPanel.setLayout(new BorderLayout(10, 10));
         tabbedPane.addTab("View Events", viewEventsPanel);
 
-        String[] headers = {
-            "Select", "Event ID", "Event Category", "Event Type", "Event Name",
-            "Age Restrictions", "Quantity", "Ticket Price", "Additional Info"
-        };
+        String[] headers = { "Select", "Event ID", "Event Category", "Event Type", "Event Name", "Age Restrictions", "Quantity", "Ticket Price", "Additional Info" };
 
         DefaultTableModel tableModel = new DefaultTableModel(headers, 0) {
             @Override
@@ -55,26 +85,19 @@ public class CustomerPage extends JFrame {
             @Override
             public Class<?> getColumnClass(int columnIndex) {
                 return switch (columnIndex) {
-                    case 0 -> Boolean.class;   // Checkbox for basket
-                    case 1 -> Integer.class;   // Event ID integer
-                    case 6 -> Integer.class;   // Quantity integer
-                    case 7 -> Double.class;    // Ticket Price double
-                    default -> String.class; // otherwise, all string inputs
+                    case 0 -> Boolean.class;
+                    case 1 -> Integer.class;
+                    case 6 -> Integer.class;
+                    case 7 -> Double.class;
+                    default -> String.class;
                 };
             }
         };
 
         List<LiveEvent> events = new ManageEvents("Stock.txt").getAllEvents();
-
         for (LiveEvent e : events) {
-            String info = "";
-            if (e instanceof MusicEvent m) {
-                info = m.getAdditionalInfo();
-            } else if (e instanceof Performance p) {
-                info = p.getAdditionalInfo();
-            }
-
-            boolean canSelect = e.getQuantityInStock() > 0;
+            String info = e instanceof MusicEvent m ? m.getAdditionalInfo() :
+                          e instanceof Performance p ? p.getAdditionalInfo() : "";
 
             tableModel.addRow(new Object[] {
                 false,
@@ -96,21 +119,38 @@ public class CustomerPage extends JFrame {
         TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(tableModel);
         tblEvents.setRowSorter(sorter);
         sorter.setSortKeys(java.util.Collections.singletonList(
-            new RowSorter.SortKey(7, SortOrder.ASCENDING)
-        ));
+            new RowSorter.SortKey(7, SortOrder.ASCENDING)));
 
         setColumnWidths(tblEvents);
-
         JScrollPane scrollPane = new JScrollPane(tblEvents);
-        scrollPane.setBounds(0, 0, 940, 260);
-        viewEventsPanel.add(scrollPane);
+        viewEventsPanel.add(scrollPane, BorderLayout.CENTER);
 
+        JPanel viewEventsButtonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         JButton btnAddToBasket = new JButton("Add Selected to Basket");
-        btnAddToBasket.setFont(new Font("Tahoma", Font.PLAIN, 14));
-        btnAddToBasket.setBounds(700, 270, 200, 30);
-        viewEventsPanel.add(btnAddToBasket);
-        
-        
+        viewEventsButtonPanel.add(btnAddToBasket);
+        viewEventsPanel.add(viewEventsButtonPanel, BorderLayout.SOUTH);
+
+        JPanel basketTabPanel = new JPanel(new BorderLayout(10, 10));
+        tabbedPane.addTab("Basket", basketTabPanel);
+
+        DefaultTableModel basketModel = new DefaultTableModel(
+            new Object[]{"Event ID", "Category", "Type", "Name", "Age", "Quantity", "Price", "Info"}, 0);
+        tblBasket = new JTable(basketModel);
+        tblBasket.setFillsViewportHeight(true);
+
+        JScrollPane basketScrollPane = new JScrollPane(tblBasket);
+        basketScrollPane.setPreferredSize(new Dimension(940, 400));
+        basketTabPanel.add(basketScrollPane, BorderLayout.CENTER);
+
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JButton btnClearBasket = new JButton("Clear Basket");
+        JButton btnPay = new JButton("Pay");
+
+        buttonPanel.add(btnClearBasket);
+        buttonPanel.add(btnPay);
+
+        basketTabPanel.add(buttonPanel, BorderLayout.SOUTH);
+
         btnAddToBasket.addActionListener(e -> {
             try (FileWriter writer = new FileWriter("Basket.txt", true)) {
                 for (int i = 0; i < tableModel.getRowCount(); i++) {
@@ -125,6 +165,17 @@ public class CustomerPage extends JFrame {
                             }
                         }
                         writer.write(line.toString() + "\n");
+
+                        basketModel.addRow(new Object[] {
+                            tableModel.getValueAt(i, 1),
+                            tableModel.getValueAt(i, 2),
+                            tableModel.getValueAt(i, 3),
+                            tableModel.getValueAt(i, 4),
+                            tableModel.getValueAt(i, 5),
+                            tableModel.getValueAt(i, 6),
+                            tableModel.getValueAt(i, 7),
+                            tableModel.getValueAt(i, 8)
+                        });
                     }
                 }
                 JOptionPane.showMessageDialog(this, "Selected events added to basket.");
@@ -132,30 +183,108 @@ public class CustomerPage extends JFrame {
                 JOptionPane.showMessageDialog(this, "Error writing to basket.txt: " + ex.getMessage());
             }
         });
-        
-        JButton btnClearBasket = new JButton("Clear Basket");
-        btnClearBasket.setFont(new Font("Tahoma", Font.PLAIN, 14));
-        btnClearBasket.setBounds(20, 270, 142, 33);
-        viewEventsPanel.add(btnClearBasket);
+
         btnClearBasket.addActionListener(e -> {
-        	try (FileWriter writer = new FileWriter("Basket.txt", false)) {
-        		writer.write("");
-        		writer.close();
-        		JOptionPane.showMessageDialog(this, "Basket cleared");
-        	} catch (IOException e1) {
-				e1.printStackTrace();
-			}
+            try {
+                Path basketPath = Paths.get("Basket.txt");
+                long lineCount = Files.lines(basketPath).count();
+
+                if (lineCount > 0) {
+                    try (FileWriter writer = new FileWriter("Basket.txt", false)) {
+                        writer.write("");
+                    }
+                    basketModel.setRowCount(0);
+                    JOptionPane.showMessageDialog(this, "Basket cleared");
+                } else {
+                    JOptionPane.showMessageDialog(this, "Your basket is empty");
+                }
+            } catch (IOException ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(this, "Basket error");
+            }
         });
-        
+
+        btnPay.addActionListener(e -> {
+            if (basketModel.getRowCount() == 0) {
+                JOptionPane.showMessageDialog(this, "Your basket is empty. Please add items before paying.");
+                return;
+            }
+
+            double total = 0;
+            for (int i = 0; i < basketModel.getRowCount(); i++) {
+                double price = (double) basketModel.getValueAt(i, 6);
+                total += price;
+            }
+
+            JOptionPane.showMessageDialog(this, String.format("Total amount: £%.2f\nThank you for your payment!", total));
+
+            basketModel.setRowCount(0);
+            try (FileWriter writer = new FileWriter("Basket.txt", false)) {
+                writer.write("");
+            } catch (IOException ex) {
+                JOptionPane.showMessageDialog(this, "Error clearing basket: " + ex.getMessage());
+            }
+        });
+
+        btnLogout.addActionListener(e -> {
+            try {
+                Path basketPath = Paths.get("Basket.txt");
+                long lineCount = Files.lines(basketPath).count();
+                if (lineCount > 0) {
+                    try (FileWriter writer = new FileWriter("Basket.txt", false)) {
+                        writer.write("");
+                    }
+                    basketModel.setRowCount(0);
+                }
+            } catch (IOException ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(this, "Basket error");
+            }
+            new LoginFrame().setVisible(true);
+            dispose();
+        });
+
+        btnFilter.addActionListener(e -> {
+            String idInput = txtEventIDFilter.getText().trim();
+            String langInput = txtLanguageFilter.getText().trim().toLowerCase();
+
+            DefaultTableModel model = (DefaultTableModel) tblEvents.getModel();
+            model.setRowCount(0);
+
+            List<LiveEvent> filteredEvents = new ManageEvents("Stock.txt").getAllEvents();
+
+            for (LiveEvent ev : filteredEvents) {
+                boolean matchesID = idInput.isEmpty() || String.valueOf(ev.getEventID()).equals(idInput);
+                boolean matchesLang = true;
+
+                if (!langInput.isEmpty()) {
+                    if (ev instanceof Performance p) {
+                        matchesLang = p.getAdditionalInfo().toLowerCase().contains(langInput);
+                    } else {
+                        matchesLang = false;
+                    }
+                }
+
+                if (matchesID && matchesLang) {
+                    String info = ev instanceof MusicEvent m ? m.getAdditionalInfo() :
+                                  ev instanceof Performance p ? p.getAdditionalInfo() : "";
+
+                    model.addRow(new Object[] {
+                        false,
+                        ev.getEventID(),
+                        ev.getEventCategory(),
+                        ev.getEventType(),
+                        ev.getEventName(),
+                        ev.getAgeRestriction(),
+                        ev.getQuantityInStock(),
+                        ev.getTicketPrice(),
+                        info
+                    });
+                }
+            }
+        });
     }
 
-    
-    	
-
-    
-    
-    
-    
     private void setColumnWidths(JTable table) {
         TableColumn column;
         for (int i = 0; i < table.getColumnCount(); i++) {
