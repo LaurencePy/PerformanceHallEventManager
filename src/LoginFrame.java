@@ -70,18 +70,18 @@ public class LoginFrame extends JFrame {
 		panel.add(titleText);
 		
 		JButton btnLogin = new JButton("Login");
-		btnLogin.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
+		btnLogin.addActionListener(e -> {
 				String selectedName = (String) comboBox.getSelectedItem();
 				ManageUsers manageUsers = new ManageUsers("UserAccounts.txt");
 				User user = manageUsers.getUserFromName(selectedName);
+				
 				if (user != null && !selectedName.equals("Select")) {
 				    user.openPage();
 				    dispose();
 				} else {
 				    JOptionPane.showMessageDialog(null, "Invalid user selected.");
 				}
-			}
+				
 		});
 		btnLogin.setBackground(new Color(192, 192, 192));
 		btnLogin.setFont(new Font("Tahoma", Font.PLAIN, 15));

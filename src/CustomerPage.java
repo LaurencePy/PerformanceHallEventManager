@@ -42,9 +42,9 @@ public class CustomerPage extends JFrame {
         txtEventIDFilter = new JTextField(5);
         txtEventIDFilter.setDocument(new PlainDocument() {
             @Override
-            public void insertString(int offs, String str, AttributeSet a) throws BadLocationException {
+            public void insertString(int offset, String str, AttributeSet a) throws BadLocationException {
                 if ((getLength() + str.length()) <= 5 && str.matches("\\d+")) {
-                    super.insertString(offs, str, a);
+                    super.insertString(offset, str, a);
                 }
             }
         });
@@ -93,7 +93,7 @@ public class CustomerPage extends JFrame {
                 };
             }
         };
-
+        
         List<LiveEvent> events = new ManageEvents("Stock.txt").getAllEvents();
         for (LiveEvent e : events) {
             String info = e instanceof MusicEvent m ? m.getAdditionalInfo() :
@@ -132,11 +132,25 @@ public class CustomerPage extends JFrame {
 
         JPanel basketTabPanel = new JPanel(new BorderLayout(10, 10));
         tabbedPane.addTab("Basket", basketTabPanel);
-
+        
         DefaultTableModel basketModel = new DefaultTableModel(
             new Object[]{"Event ID", "Category", "Type", "Name", "Age", "Quantity", "Price", "Info"}, 0);
         tblBasket = new JTable(basketModel);
         tblBasket.setFillsViewportHeight(true);
+        try {
+            List<String> lines = Files.readAllLines(Paths.get("Basket.txt"));
+            for (String line : lines) {
+                String[] parts = line.split(",\\s*");
+                if (parts.length == 8) {
+                    basketModel.addRow(parts);
+                }
+            }
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Error loading basket contents");
+        }
+
+        
 
         JScrollPane basketScrollPane = new JScrollPane(tblBasket);
         basketScrollPane.setPreferredSize(new Dimension(940, 400));
@@ -144,19 +158,21 @@ public class CustomerPage extends JFrame {
 
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         JButton btnClearBasket = new JButton("Clear Basket");
-        JButton btnPay = new JButton("Pay");
+        JButton btnCheckout = new JButton("Checkout");
 
         buttonPanel.add(btnClearBasket);
-        buttonPanel.add(btnPay);
+        buttonPanel.add(btnCheckout);
 
         basketTabPanel.add(buttonPanel, BorderLayout.SOUTH);
 
         btnAddToBasket.addActionListener(e -> {
             try (FileWriter writer = new FileWriter("Basket.txt", true)) {
+            	Boolean itemsSelected = false;
                 for (int i = 0; i < tableModel.getRowCount(); i++) {
                     Boolean selected = (Boolean) tableModel.getValueAt(i, 0);
                     int quantity = (Integer) tableModel.getValueAt(i, 6);
                     if (selected != null && selected && quantity > 0) {
+                    	itemsSelected = true;
                         StringBuilder line = new StringBuilder();
                         for (int j = 1; j < tableModel.getColumnCount(); j++) {
                             line.append(tableModel.getValueAt(i, j));
@@ -178,7 +194,12 @@ public class CustomerPage extends JFrame {
                         });
                     }
                 }
-                JOptionPane.showMessageDialog(this, "Selected events added to basket.");
+                if (itemsSelected == true) {
+                	JOptionPane.showMessageDialog(this, "Selected events added to basket");
+                } else {
+                	JOptionPane.showMessageDialog(this, "You have not selected any events");
+                }
+                
             } catch (IOException ex) {
                 JOptionPane.showMessageDialog(this, "Error writing to basket.txt: " + ex.getMessage());
             }
@@ -204,9 +225,9 @@ public class CustomerPage extends JFrame {
             }
         });
 
-        btnPay.addActionListener(e -> {
+        btnCheckout.addActionListener(e -> {
             if (basketModel.getRowCount() == 0) {
-                JOptionPane.showMessageDialog(this, "Your basket is empty. Please add items before paying.");
+                JOptionPane.showMessageDialog(this, "Your basket is empty. Please add items before checking out");
                 return;
             }
 
@@ -215,15 +236,9 @@ public class CustomerPage extends JFrame {
                 double price = (double) basketModel.getValueAt(i, 6);
                 total += price;
             }
-
-            JOptionPane.showMessageDialog(this, String.format("Total amount: £%.2f\nThank you for your payment!", total));
-
-            basketModel.setRowCount(0);
-            try (FileWriter writer = new FileWriter("Basket.txt", false)) {
-                writer.write("");
-            } catch (IOException ex) {
-                JOptionPane.showMessageDialog(this, "Error clearing basket: " + ex.getMessage());
-            }
+            
+            new CheckoutFrame(name, total).setVisible(true);
+            dispose();
         });
 
         btnLogout.addActionListener(e -> {
