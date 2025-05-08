@@ -13,6 +13,11 @@ import javax.swing.JButton;
 import java.awt.Color;
 import javax.swing.DefaultComboBoxModel;
 import java.awt.event.ActionListener;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.awt.event.ActionEvent;
 
 public class LoginFrame extends JFrame {
@@ -74,6 +79,20 @@ public class LoginFrame extends JFrame {
 				String selectedName = (String) comboBox.getSelectedItem();
 				ManageUsers manageUsers = new ManageUsers("UserAccounts.txt");
 				User user = manageUsers.getUserFromName(selectedName);
+				
+				try {
+				    Path basketPath = Paths.get("Basket.txt");
+				    long lineCount = Files.lines(basketPath).count();
+				    if (lineCount > 0) {
+				        try (FileWriter writer = new FileWriter("Basket.txt", false)) {
+				            writer.write("");
+				        }
+				    }
+				} catch (IOException ex) {
+				    ex.printStackTrace();
+				    JOptionPane.showMessageDialog(this, "Basket error");
+				}
+
 				
 				if (user != null && !selectedName.equals("Select")) {
 				    user.openPage();
