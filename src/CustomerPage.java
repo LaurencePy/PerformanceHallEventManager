@@ -233,9 +233,11 @@ public class CustomerPage extends JFrame {
 
             double total = 0;
             for (int i = 0; i < basketModel.getRowCount(); i++) {
-                double price = (double) basketModel.getValueAt(i, 6);
+                String priceStr = basketModel.getValueAt(i, 6).toString();
+                double price = Double.parseDouble(priceStr);
                 total += price;
             }
+
             
             new CheckoutFrame(name, total).setVisible(true);
             dispose();

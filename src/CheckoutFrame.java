@@ -58,9 +58,9 @@ public class CheckoutFrame extends JFrame {
 		payMethodBox.setBounds(426, 153, 147, 39);
 		contentPane.add(payMethodBox);
 		
-		JLabel lblTotalHead = new JLabel("Total price:");
+		JLabel lblTotalHead = new JLabel("Total price: £" + total);
 		lblTotalHead.setFont(new Font("Tahoma", Font.PLAIN, 15));
-		lblTotalHead.setBounds(466, 430, 147, 27);
+		lblTotalHead.setBounds(437, 430, 147, 27);
 		contentPane.add(lblTotalHead);
 		
 		txtPaypalEmailAddress = new JTextField();
@@ -161,8 +161,6 @@ public class CheckoutFrame extends JFrame {
                     return;
                 }
             }
-            // fix security code and number being checked wehn in paypal mode
-
 		});
 		
 		
