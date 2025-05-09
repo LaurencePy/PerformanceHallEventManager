@@ -34,12 +34,20 @@ public class ManageUsers {
         }
     }
 
-    public User getUserFromName(String name) {
+    public User getUserFromName(String idAndName) {
         for (User u : users) {
-            if (u.getName().equalsIgnoreCase(name)) {
+            String combined = u.getUserID() + " - " + u.getName();
+            if (combined.equalsIgnoreCase(idAndName)) {
                 return u;
             }
         }
         return null;
     }
+
+    
+    public List<User> getUsers() {
+        return users;
+    }
+
+
 }

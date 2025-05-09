@@ -11,6 +11,6 @@ public abstract class User {
 
     public String getName() { return name; }
     public Address getAddress() { return address; }
-
+    public String getUserID() { return userID; }
     public abstract void openPage();
 }

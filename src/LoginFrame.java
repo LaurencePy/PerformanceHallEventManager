@@ -60,7 +60,16 @@ public class LoginFrame extends JFrame {
 		
 		JComboBox comboBox = new JComboBox();
 		comboBox.setFont(new Font("Tahoma", Font.PLAIN, 15));
-		comboBox.setModel(new DefaultComboBoxModel(new String[] {"Select", "Sarasvati", "Felix", "Hikaru", "Salma"}));
+		DefaultComboBoxModel<String> model = new DefaultComboBoxModel<>();
+		model.addElement("Select");
+
+		ManageUsers manageUsers = new ManageUsers("UserAccounts.txt");
+		for (User user : manageUsers.getUsers()) {
+		    model.addElement(user.getUserID() + " - " + user.getName());
+		}
+
+		comboBox.setModel(model);
+
 		comboBox.setBounds(113, 121, 155, 26);
 		panel.add(comboBox);
 		
@@ -77,8 +86,8 @@ public class LoginFrame extends JFrame {
 		JButton btnLogin = new JButton("Login");
 		btnLogin.addActionListener(e -> {
 				String selectedName = (String) comboBox.getSelectedItem();
-				ManageUsers manageUsers = new ManageUsers("UserAccounts.txt");
-				User user = manageUsers.getUserFromName(selectedName);
+				ManageUsers userManager = new ManageUsers("UserAccounts.txt");
+				User user = userManager.getUserFromName(selectedName);
 				
 				try {
 				    Path basketPath = Paths.get("Basket.txt");
