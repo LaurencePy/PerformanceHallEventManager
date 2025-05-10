@@ -8,6 +8,7 @@ public class ManageUsers {
         loadUsers(filePath);
     }
 
+    // process users data
     private void loadUsers(String filePath) {
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
             String line;
@@ -22,7 +23,8 @@ public class ManageUsers {
                     String role = items[6].trim().toLowerCase();
 
                     Address address = new Address(houseNum, postcode, city);
-
+                    
+                    // call necessary class
                     if (role.equals("admin")) {
                         users.add(new Admin(userID, name, address));
                     } else if (role.equals("customer")) {
@@ -33,7 +35,7 @@ public class ManageUsers {
             e.printStackTrace();
         }
     }
-
+    // extract username
     public User getUserFromName(String idAndName) {
         for (User u : users) {
             String combined = u.getUserID() + " - " + u.getName();

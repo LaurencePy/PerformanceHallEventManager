@@ -17,7 +17,8 @@ public class ReceiptFrame extends JFrame {
 
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
-
+	
+	// takes in all necessary parameters to produce receipt with data put into output text
 	public ReceiptFrame(Address address, double total, String selectedMethod, String identifier) {
 	    setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	    setBounds(100, 100, 500, 300);
@@ -25,7 +26,8 @@ public class ReceiptFrame extends JFrame {
 	    contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 	    contentPane.setLayout(null);
 	    setContentPane(contentPane);
-
+	    
+	    // logout and clear basket (should already be clear)
 	    JButton btnLogout = new JButton("Logout");
         btnLogout.addActionListener(e -> {
             try {
@@ -47,10 +49,12 @@ public class ReceiptFrame extends JFrame {
 	    btnLogout.setBounds(20, 10, 90, 27);
 	    contentPane.add(btnLogout);
 
-
+	    // get the date and address
 	    String todayDate = java.time.LocalDate.now().toString();
 	    String fullAddress = address.getFullAddress();
 	    String receiptText = "";
+	    
+	    // conditional output text depending on payment type
 	    if (selectedMethod.equals("PayPal")) {
 	    	receiptText = String.format("£%.2f paid via PayPal using %s on %s, and the billing address is %s.",
                     total, identifier, todayDate, fullAddress);

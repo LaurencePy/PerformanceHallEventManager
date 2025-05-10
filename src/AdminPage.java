@@ -13,7 +13,9 @@ public class AdminPage extends JFrame {
     private static final long serialVersionUID = 1L;
     private JPanel contentPane;
     private JTable tblEvents;
-
+    
+    
+    // called if role = admin from login page
     public AdminPage(String name) {
         setTitle(name + " - Admin");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -42,11 +44,14 @@ public class AdminPage extends JFrame {
         viewEventsPanel.setLayout(null);
         tabbedPane.addTab("View Events", viewEventsPanel);
 
+        // table headers for admin table view
         String[] headers = {
             "Event ID", "Event Category", "Event Type", "Event Name",
             "Age Restrictions", "Quantity", "Performance Fee", "Ticket Price", "Additional Info"
         };
-
+        
+        
+        // data types for table
         DefaultTableModel tableModel = new DefaultTableModel(headers, 0) {
             @Override
             public Class<?> getColumnClass(int columnIndex) {
@@ -62,6 +67,7 @@ public class AdminPage extends JFrame {
 
         List<LiveEvent> events = new ManageEvents("Stock.txt").getAllEvents();
 
+        // for each item in stock.txt populate the table
         for (LiveEvent e : events) {
         	String eventType = e.getEventType();
             String info = "";
@@ -91,6 +97,7 @@ public class AdminPage extends JFrame {
         tblEvents.setFillsViewportHeight(true);
         setColumnWidths(tblEvents);
 
+        // sort by ticket price ascending
         TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(tableModel);
         tblEvents.setRowSorter(sorter);
         sorter.setSortKeys(java.util.Collections.singletonList(
@@ -101,10 +108,13 @@ public class AdminPage extends JFrame {
         scrollPane.setBounds(0, 0, 890, 260);
         viewEventsPanel.add(scrollPane);
 
-
+        
+        
+        // panel for adding an event to stock.txt
         JPanel addEventPanel = new JPanel();
         addEventPanel.setLayout(null);
 
+        // populate comboboxes with these two lists for age and event category
         String[] ageOptions = { "All", "Adults" };
         String[] categoryOptions = { "Music", "Performance" };
 
@@ -172,6 +182,7 @@ public class AdminPage extends JFrame {
         addEventPanel.add(txtInfo);
 
 
+        // validation of inputs for adding event
         JButton btnSubmit = new JButton("Add Event");
         btnSubmit.setBounds(370, 200, 150, 30);
         addEventPanel.add(btnSubmit);
@@ -220,7 +231,8 @@ public class AdminPage extends JFrame {
                 }
 
                 String info = txtInfo.getText().trim();
-
+                
+                // gather data and write inputs into a line in Stock.txt once verified as valid.
                 String line = String.format("%d, %s, %s, %s, %s, %d, %.2f, %.2f, %s",
                         eventID, category, type, eventName, age, qty, fee, price, info);
 
@@ -243,7 +255,8 @@ public class AdminPage extends JFrame {
                         info
                 });
                 ((DefaultTableModel) tblEvents.getModel()).fireTableDataChanged();
-
+                
+                // update table, reset inputs
                 txtEventID.setText("");
                 txtType.setText("");
                 txtName.setText("");
@@ -265,7 +278,8 @@ public class AdminPage extends JFrame {
         
         tabbedPane.addTab("Add Event", addEventPanel);
     }
-
+    
+    // set column widths for the table to view headers clearly
     private void setColumnWidths(JTable table) {
         TableColumn column;
         for (int i = 0; i < table.getColumnCount(); i++) {

@@ -25,6 +25,11 @@ public class CustomerPage extends JFrame {
 	private Customer currentCustomer;
 
     public CustomerPage(Customer customer) {
+    	
+    	/*
+    	 Page opened if selected user on login is a customer role according to UserAccounts.txt
+    	 */
+    	
     	this.currentCustomer = customer;
     	setTitle(customer.getUserID() + " - " + customer.getName());
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -47,7 +52,7 @@ public class CustomerPage extends JFrame {
             public void insertString(int offset, String str, AttributeSet a) throws BadLocationException {
                 if ((getLength() + str.length()) <= 5 && str.matches("\\d+")) {
                     super.insertString(offset, str, a);
-                }
+                } // filter validation/logic
             }
         });
 
@@ -94,8 +99,10 @@ public class CustomerPage extends JFrame {
                     default -> String.class;
                 };
             }
-        };
+        }; 
         
+        /* populate view events table
+        */
         List<LiveEvent> events = new ManageEvents("Stock.txt").getAllEvents();
         for (LiveEvent e : events) {
             String info = e instanceof MusicEvent m ? m.getAdditionalInfo() :
@@ -121,7 +128,7 @@ public class CustomerPage extends JFrame {
         TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(tableModel);
         tblEvents.setRowSorter(sorter);
         sorter.setSortKeys(java.util.Collections.singletonList(
-            new RowSorter.SortKey(7, SortOrder.ASCENDING)));
+            new RowSorter.SortKey(7, SortOrder.ASCENDING))); // sort by ticket price ascending
 
         setColumnWidths(tblEvents);
         JScrollPane scrollPane = new JScrollPane(tblEvents);
@@ -135,6 +142,9 @@ public class CustomerPage extends JFrame {
         JPanel basketTabPanel = new JPanel(new BorderLayout(10, 10));
         tabbedPane.addTab("Basket", basketTabPanel);
         
+        /*
+        Loading basket from Basket.txt
+        */
         DefaultTableModel basketModel = new DefaultTableModel(
             new Object[]{"Event ID", "Category", "Type", "Name", "Age", "Quantity", "Price", "Info"}, 0);
         tblBasket = new JTable(basketModel);
@@ -145,7 +155,7 @@ public class CustomerPage extends JFrame {
                 String[] parts = line.split(",\\s*");
                 if (parts.length == 8) {
                     basketModel.addRow(parts);
-                }
+                } 
             }
         } catch (IOException ex) {
             ex.printStackTrace();
@@ -166,7 +176,11 @@ public class CustomerPage extends JFrame {
         buttonPanel.add(btnCheckout);
 
         basketTabPanel.add(buttonPanel, BorderLayout.SOUTH);
-
+        
+        
+        /*
+        Populating basket from items added to basket using add to basket button
+        */
         btnAddToBasket.addActionListener(e -> {
             try (FileWriter writer = new FileWriter("Basket.txt", true)) {
             	Boolean itemsSelected = false;
@@ -207,6 +221,10 @@ public class CustomerPage extends JFrame {
             }
         });
 
+        
+        /*
+         Clear basket by overwriting file to empty
+         */
         btnClearBasket.addActionListener(e -> {
             try {
                 Path basketPath = Paths.get("Basket.txt");
@@ -227,6 +245,10 @@ public class CustomerPage extends JFrame {
             }
         });
 
+        /*
+         * checking if there are items in the basket, 
+         * then adding up prices from each item for the total to pass on to the checkout
+         */
         btnCheckout.addActionListener(e -> {
             if (basketModel.getRowCount() == 0) {
                 JOptionPane.showMessageDialog(this, "Your basket is empty. Please add items before checking out");
@@ -245,7 +267,8 @@ public class CustomerPage extends JFrame {
 
             dispose();
         });
-
+        
+        // clear basket on logout. basket only retained while user is logged in
         btnLogout.addActionListener(e -> {
             try {
                 Path basketPath = Paths.get("Basket.txt");
@@ -272,7 +295,8 @@ public class CustomerPage extends JFrame {
             model.setRowCount(0);
 
             List<LiveEvent> filteredEvents = new ManageEvents("Stock.txt").getAllEvents();
-
+            
+            // filter by checking for matches in items in teh table to the inputs
             for (LiveEvent ev : filteredEvents) {
                 boolean matchesID = idInput.isEmpty() || String.valueOf(ev.getEventID()).equals(idInput);
                 boolean matchesLang = true;
@@ -284,7 +308,9 @@ public class CustomerPage extends JFrame {
                         matchesLang = false;
                     }
                 }
-
+                
+                // if there are matches, then add to the table and reload.
+                // effectively a new table
                 if (matchesID && matchesLang) {
                     String info = ev instanceof MusicEvent m ? m.getAdditionalInfo() :
                                   ev instanceof Performance p ? p.getAdditionalInfo() : "";
@@ -300,13 +326,15 @@ public class CustomerPage extends JFrame {
                         ev.getTicketPrice(),
                         info
                     });
+                    
+                    
                 }
             }
         });
     }
 
 
-
+    // making spacing for the table headers
 	private void setColumnWidths(JTable table) {
         TableColumn column;
         for (int i = 0; i < table.getColumnCount(); i++) {

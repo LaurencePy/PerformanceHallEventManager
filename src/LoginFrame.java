@@ -25,8 +25,8 @@ public class LoginFrame extends JFrame {
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
 
-	/**
-	 * Launch the application.
+	/*
+	 Initial frame
 	 */
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
@@ -38,6 +38,7 @@ public class LoginFrame extends JFrame {
 					e.printStackTrace();
 				}
 				try {
+					// clearing the basket on launch just in case
 				    Path basketPath = Paths.get("Basket.txt");
 				    long lineCount = Files.lines(basketPath).count();
 				    if (lineCount > 0) {
@@ -52,9 +53,6 @@ public class LoginFrame extends JFrame {
 		});
 	}
 
-	/**
-	 * Create the frame.
-	 */
 	public LoginFrame() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 450, 300);
@@ -69,6 +67,7 @@ public class LoginFrame extends JFrame {
 		contentPane.add(panel);
 		panel.setLayout(null);
 		
+		
 		JComboBox comboBox = new JComboBox();
 		comboBox.setFont(new Font("Tahoma", Font.PLAIN, 15));
 		DefaultComboBoxModel<String> model = new DefaultComboBoxModel<>();
@@ -78,6 +77,7 @@ public class LoginFrame extends JFrame {
 		for (User user : manageUsers.getUsers()) {
 		    model.addElement(user.getUserID() + " - " + user.getName());
 		}
+		// ^ populating combobox with users
 
 		comboBox.setModel(model);
 
@@ -96,10 +96,11 @@ public class LoginFrame extends JFrame {
 		
 		JButton btnLogin = new JButton("Login");
 		btnLogin.addActionListener(e -> {
-				String selectedName = (String) comboBox.getSelectedItem();
+				String selectedName = (String) comboBox.getSelectedItem(); // get user
 				ManageUsers userManager = new ManageUsers("UserAccounts.txt");
-				User user = userManager.getUserFromName(selectedName);
+				User user = userManager.getUserFromName(selectedName); // get admin/customer role from name
 				
+				// clearing basket again on login. just in case.
 				try {
 				    Path basketPath = Paths.get("Basket.txt");
 				    long lineCount = Files.lines(basketPath).count();
@@ -117,6 +118,7 @@ public class LoginFrame extends JFrame {
 				if (user != null && !selectedName.equals("Select")) {
 				    user.openPage();
 				    dispose();
+				    // login with selected user, either adminpage or customerpage
 				} else {
 				    JOptionPane.showMessageDialog(null, "Invalid user selected.");
 				}

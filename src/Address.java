@@ -5,6 +5,7 @@ public class Address {
     private String postcode;
     private String city;
 
+    // used to retrieve address of user
     public Address(String houseNumber, String postcode, String city) {
         this.houseNumber = houseNumber;
         this.postcode = postcode;

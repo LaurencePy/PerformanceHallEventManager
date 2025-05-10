@@ -14,7 +14,11 @@ public class ManageEvents {
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
             String line;
             while ((line = br.readLine()) != null) {
+            	// v DEBUG to show read lines
             	//System.out.println("DEBUG Read line: " + line);
+            	
+            	
+            	// load events from stock and categorise into music or performance
                 String[] parts = line.split(",");
                 if (parts.length == 9) {
                     int eventID = Integer.parseInt(parts[0].trim());
@@ -45,9 +49,13 @@ public class ManageEvents {
         }
     }
 
+    // returns list of live events sorted by ticket price (ascending)
     public List<LiveEvent> getAllEvents() {
+    	// convert events list into a stream
         return events.stream()
+        		// sort stream by ticket price asc
             .sorted(Comparator.comparingDouble(LiveEvent::getTicketPrice))
+            // put back into list and sort
             .collect(Collectors.toList());
     }
 }

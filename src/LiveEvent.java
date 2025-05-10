@@ -13,6 +13,9 @@ public abstract class LiveEvent {
     private LiveEventCategory liveEventCategory;
     private String eventType;
     
+    
+    
+    
     public LiveEvent(int eventID, String eventName, AgeRestrictionCategory restriction, int quantityInStock, double performanceFee, double ticketPrice, LiveEventCategory liveEventCategory, String eventType) {
         this.eventID = eventID;
         this.eventName = eventName;

@@ -36,7 +36,7 @@ public class CheckoutFrame extends JFrame {
 	private User currentUser;
 	private Customer currentCustomer;
 	
-
+	// takes current customer and total of items in basket as parameters
 	public CheckoutFrame(Customer customer, double total) {
 	    this.currentCustomer = customer;
 	    this.currentUser = customer;
@@ -49,6 +49,7 @@ public class CheckoutFrame extends JFrame {
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
 		
+		// back button to go back to basket (customer page)
 		JButton btnBack = new JButton("← Back");
 		btnBack.addActionListener(e -> {
 			new CustomerPage(currentCustomer).setVisible(true);
@@ -120,6 +121,10 @@ public class CheckoutFrame extends JFrame {
 		lblSecurityCode.setBounds(580, 310, 168, 27);
 		contentPane.add(lblSecurityCode);
 		
+		/*
+		 * alter visible input fields on the page
+		 * depends on the selected payment method: paypal or credit card
+		 */
 		payMethodBox.addActionListener(e -> {
 			String selectedMethod = (String) payMethodBox.getSelectedItem();
 			if (selectedMethod.equals("PayPal")) {
@@ -151,6 +156,10 @@ public class CheckoutFrame extends JFrame {
 			}
 		});
 
+		/*
+		 * handle validation of inputs, depending on selected payment type
+		 * uses regex for input validation
+		 */
 		btnPay.addActionListener(e -> {
 		    String selectedMethod = (String) payMethodBox.getSelectedItem();
 		    boolean isValid = false;
@@ -186,6 +195,7 @@ public class CheckoutFrame extends JFrame {
 		        identifier = email;
 		    }
 
+
 		    if (isValid) {
 
 		        List<String[]> basketItems = new ArrayList<>();
@@ -202,7 +212,10 @@ public class CheckoutFrame extends JFrame {
 		            return;
 		        }
 
-
+		        /*
+		         * if input is valid,
+		         * edit the stock with quantity -1 by using basket.txt contents
+		         */
 		        try {
 		            List<String> stockLines = Files.readAllLines(Paths.get("Stock.txt"));
 		            List<String> updatedStockLines = new ArrayList<>();
@@ -235,12 +248,12 @@ public class CheckoutFrame extends JFrame {
 		            return;
 		        }
 
-
+		        // call receipt frame
 		        Address address = currentUser.getAddress();
 		        new ReceiptFrame(address, total, selectedMethod, identifier).setVisible(true);
 		        dispose();
 
-
+		         // then clear basket
 		        try {
 		            Path basketPath = Paths.get("Basket.txt");
 		            long lineCount = Files.lines(basketPath).count();
