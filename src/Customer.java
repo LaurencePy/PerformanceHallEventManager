@@ -7,6 +7,7 @@ public class Customer extends User {
 
     @Override
     public void openPage() {
-        new CustomerPage(name).setVisible(true);
+        new CustomerPage(this).setVisible(true);
     }
 }
+

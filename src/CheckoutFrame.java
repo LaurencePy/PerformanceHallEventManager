@@ -3,8 +3,15 @@ import java.awt.EventQueue;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.JButton;
 import java.awt.Font;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 import javax.swing.JComboBox;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JTextArea;
@@ -12,6 +19,9 @@ import java.awt.Color;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -23,11 +33,15 @@ public class CheckoutFrame extends JFrame {
 	private JTextField txtPaypalEmailAddress;
 	private JTextField txtCardNo;
 	private JTextField txtSecurityCode;
+	private User currentUser;
+	private Customer currentCustomer;
 	
 
-	public CheckoutFrame(String name, double total) {
+	public CheckoutFrame(Customer customer, double total) {
+	    this.currentCustomer = customer;
+	    this.currentUser = customer;
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setTitle(name + " - Customer");
+        setTitle(getName() + " - Customer");
         setBounds(100, 100, 1000, 600);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -37,7 +51,7 @@ public class CheckoutFrame extends JFrame {
 		
 		JButton btnBack = new JButton("← Back");
 		btnBack.addActionListener(e -> {
-            new CustomerPage(name).setVisible(true);
+			new CustomerPage(currentCustomer).setVisible(true);
             dispose();
         });
 		btnBack.setFont(new Font("Tahoma", Font.PLAIN, 15));
@@ -136,32 +150,114 @@ public class CheckoutFrame extends JFrame {
 				lblSecurityCode.setVisible(false);
 			}
 		});
-		
+
 		btnPay.addActionListener(e -> {
-            String cardNo = txtCardNo.getText().trim();
-            String selectedMethod = (String) payMethodBox.getSelectedItem();
-            
-            if (selectedMethod.equals("Credit Card")) {
-            if (!cardNo.matches("\\d{6}")) {
-                JOptionPane.showMessageDialog(null, "Card number must be 6 digits.");
-                return;
-            }
-            String securityCode = txtSecurityCode.getText().trim();
-            if (!securityCode.matches("\\d{3}")) {
-                JOptionPane.showMessageDialog(null, "Security code must be 3 digits.");
-                return;
-            }
-            } else if (selectedMethod.equals("PayPal")) {
-                String PaypalEmailAddress = txtPaypalEmailAddress.getText().trim();
-                Pattern pattern = Pattern.compile("[A-Za-z0-9]+@[A-Za-z0-9]+", Pattern.CASE_INSENSITIVE);
-                Matcher matcher = pattern.matcher(PaypalEmailAddress);
-                boolean matchFound = matcher.find();
-                if (!matchFound) {
-                    JOptionPane.showMessageDialog(null, "Invalid email address");
-                    return;
-                }
-            }
+		    String selectedMethod = (String) payMethodBox.getSelectedItem();
+		    boolean isValid = false;
+		    String identifier = "";
+
+		    if (selectedMethod.equals("Credit Card")) {
+		        String cardNo = txtCardNo.getText().trim();
+		        String securityCode = txtSecurityCode.getText().trim();
+
+		        if (!cardNo.matches("\\d{6}")) {
+		            JOptionPane.showMessageDialog(null, "Card number must be 6 digits.");
+		            return;
+		        }
+		        if (!securityCode.matches("\\d{3}")) {
+		            JOptionPane.showMessageDialog(null, "Security code must be 3 digits.");
+		            return;
+		        }
+
+		        isValid = true;
+		        identifier = cardNo;
+
+		    } else if (selectedMethod.equals("PayPal")) {
+		        String email = txtPaypalEmailAddress.getText().trim();
+		        Pattern pattern = Pattern.compile("[A-Za-z0-9.]+@[A-Za-z0-9.]+", Pattern.CASE_INSENSITIVE);
+		        Matcher matcher = pattern.matcher(email);
+
+		        if (!matcher.find()) {
+		            JOptionPane.showMessageDialog(null, "Invalid email address");
+		            return;
+		        }
+
+		        isValid = true;
+		        identifier = email;
+		    }
+
+		    if (isValid) {
+
+		        List<String[]> basketItems = new ArrayList<>();
+		        try {
+		            Path basketPath = Paths.get("Basket.txt");
+		            List<String> basketLines = Files.readAllLines(basketPath);
+		            for (String line : basketLines) {
+		                String[] itemData = line.split(",\\s*");
+		                basketItems.add(itemData);
+		            }
+		        } catch (IOException ex) {
+		            ex.printStackTrace();
+		            JOptionPane.showMessageDialog(this, "Error reading basket");
+		            return;
+		        }
+
+
+		        try {
+		            List<String> stockLines = Files.readAllLines(Paths.get("Stock.txt"));
+		            List<String> updatedStockLines = new ArrayList<>();
+
+		            for (String stockLine : stockLines) {
+		                String[] stockParts = stockLine.split(",\\s*");
+		                int eventID = Integer.parseInt(stockParts[0]);
+
+		                for (String[] basketItem : basketItems) {
+		                    int basketEventID = Integer.parseInt(basketItem[0]);
+		                    if (eventID == basketEventID) {
+		                        int quantityInStock = Integer.parseInt(stockParts[5]);
+		                        if (quantityInStock > 0) {
+		                            stockParts[5] = String.valueOf(quantityInStock - 1);
+		                        } else {
+		                            JOptionPane.showMessageDialog(null, "Event sold out " + basketItem[3]);
+		                            return;
+		                        }
+		                    }
+		                }
+
+		                updatedStockLines.add(String.join(", ", stockParts));
+		            }
+
+
+		            Files.write(Paths.get("Stock.txt"), updatedStockLines);
+		        } catch (IOException ex) {
+		            ex.printStackTrace();
+		            JOptionPane.showMessageDialog(this, "Error updating stock");
+		            return;
+		        }
+
+
+		        Address address = currentUser.getAddress();
+		        new ReceiptFrame(address, total, selectedMethod, identifier).setVisible(true);
+		        dispose();
+
+
+		        try {
+		            Path basketPath = Paths.get("Basket.txt");
+		            long lineCount = Files.lines(basketPath).count();
+		            if (lineCount > 0) {
+		                try (FileWriter writer = new FileWriter("Basket.txt", false)) {
+		                    writer.write("");
+		                }
+		            }
+		        } catch (IOException ex) {
+		            ex.printStackTrace();
+		            JOptionPane.showMessageDialog(this, "Basket error");
+		        }
+		    }
 		});
+
+
+
 		
 		
 		

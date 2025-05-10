@@ -37,6 +37,17 @@ public class LoginFrame extends JFrame {
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
+				try {
+				    Path basketPath = Paths.get("Basket.txt");
+				    long lineCount = Files.lines(basketPath).count();
+				    if (lineCount > 0) {
+				        try (FileWriter writer = new FileWriter("Basket.txt", false)) {
+				            writer.write("");
+				        }
+				    }
+				} catch (IOException ex) {
+				    ex.printStackTrace();
+				}
 			}
 		});
 	}

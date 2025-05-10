@@ -22,9 +22,11 @@ public class CustomerPage extends JFrame {
     private JTextField txtLanguageFilter;
     private JButton btnFilter;
     private JButton btnLogout;
+	private Customer currentCustomer;
 
-    public CustomerPage(String name) {
-        setTitle(name + " - Customer");
+    public CustomerPage(Customer customer) {
+    	this.currentCustomer = customer;
+    	setTitle(customer.getUserID() + " - " + customer.getName());
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setBounds(100, 100, 1000, 600);
 
@@ -239,7 +241,8 @@ public class CustomerPage extends JFrame {
             }
 
             
-            new CheckoutFrame(name, total).setVisible(true);
+            new CheckoutFrame(currentCustomer, total).setVisible(true);
+
             dispose();
         });
 
@@ -302,7 +305,9 @@ public class CustomerPage extends JFrame {
         });
     }
 
-    private void setColumnWidths(JTable table) {
+
+
+	private void setColumnWidths(JTable table) {
         TableColumn column;
         for (int i = 0; i < table.getColumnCount(); i++) {
             column = table.getColumnModel().getColumn(i);
